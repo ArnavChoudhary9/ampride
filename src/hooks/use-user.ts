@@ -52,7 +52,7 @@ const getUser = async () => {
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserModel | null>(null);
-  const [updateUser, setUpdateUser] = useState(false);
+  const [updateUser, setUpdateUser] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
