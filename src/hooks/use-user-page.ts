@@ -6,24 +6,21 @@ import {
   type ReactNode,
 } from "react";
 
-import { UserPageSection, UserPageSubsection } from "@/models/UserPageSections";
+import { UserPageSection } from "@/models/UserPageSections";
 
 type UserPageContextType = {
   section: UserPageSection;
   setSection: (section: UserPageSection) => void;
-  subsection: UserPageSubsection | null;
-  setSubsection: (subsection: UserPageSubsection | null) => void;
 };
 
 const UserPageContext = createContext<UserPageContextType | undefined>(undefined);
 
 export function UserPageProvider({ children }: { children: ReactNode }) {
-  const [section, setSection] = useState<UserPageSection>(UserPageSection.General);
-  const [subsection, setSubsection] = useState<UserPageSubsection | null>(null);
+  const [section, setSection] = useState<UserPageSection>(UserPageSection.YourRides);
 
   return createElement(
     UserPageContext.Provider,
-    { value: { section, setSection, subsection, setSubsection } },
+    { value: { section, setSection } },
     children
   );
 }
