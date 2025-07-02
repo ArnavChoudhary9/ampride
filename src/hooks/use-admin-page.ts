@@ -19,7 +19,7 @@ const AdminPageContext = createContext<AdminPageContextType | undefined>(undefin
 
 export function AdminPageProvider({ children }: { children: ReactNode }) {
   const [section, setSection] = useState<AdminPageSection>(AdminPageSection.Rides);
-  const [subSection, setSubSection] = useState<AdminPageSubsection>(AdminPageSubsection.New);
+  const [subSection, setSubSection] = useState<AdminPageSubsection>(AdminPageSubsection.Existing);
 
   return createElement(
     AdminPageContext.Provider,
