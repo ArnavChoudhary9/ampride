@@ -15,6 +15,7 @@ export interface UserContextType {
   setUser: (user: UserModel | null) => void;
   loading: boolean;
   updateUser: () => void;
+  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -39,6 +40,7 @@ const getUser = async () => {
       id: data.user.id,
       email: data.user.email,
       profile_created: false,
+      admin: false,
     }
   }
 
@@ -46,6 +48,7 @@ const getUser = async () => {
     id: data.user.id,
     email: data.user.email,
     profile_created: true,
+    admin: false,
     ...profile,
   };
 };
@@ -65,9 +68,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUpdateUser(false);
   }, [updateUser]);
 
+  const logout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
   return createElement(
     UserContext.Provider,
-    { value: { user, setUser, loading, updateUser: () => setUpdateUser(true) } },
+    { value: { user, setUser, loading, updateUser: () => setUpdateUser(true), logout } },
     children
   );
 }

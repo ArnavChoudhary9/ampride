@@ -19,6 +19,8 @@ create table user_profile (
 export interface UserModel {
   id: string;
   email: string;
+  admin: boolean;
+  privileges?: Record<string, boolean>;
   profile_created: boolean;
   name?: string;
   phone_number?: string;
