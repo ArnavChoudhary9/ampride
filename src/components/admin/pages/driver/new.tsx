@@ -18,6 +18,7 @@ import { AdminPageSection, AdminPageSubsection } from "@/models/AdminPageSection
 interface NewDriverFormData {
   userId: string;
   email: string;
+  photo?: File;
   license_number: string;
   license_expiry?: Date;
 }
@@ -52,7 +53,7 @@ export default function NewDriverPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [month, setMonth] = useState<Date | undefined>(formData.license_expiry || new Date("2025-06-01"));
   const [value, setValue] = useState(formatDate(formData.license_expiry));
 
@@ -139,13 +140,43 @@ export default function NewDriverPage() {
       return;
     }
 
+    if (!formData.photo) {
+      setError("Please upload a photo.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     const supabase = createClient();
 
+    const fileExtension = formData.photo.name.split('.').pop();
+    const fileName = `public/driver_${formData.userId}.${fileExtension}`;
+
+    const { error: imageUploadError } = await supabase
+      .storage
+      .from('driver-photos')
+      .upload(fileName, formData.photo, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (imageUploadError) {
+      console.error("Error uploading driver photo:", imageUploadError);
+      setError(`Failed to upload photo: ${imageUploadError.message}`);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: publicUrlData } = await supabase
+      .storage
+      .from('driver-photos')
+      .getPublicUrl(fileName);
+
+
     const { error: insertError } = await supabase.from("drivers").insert({
       id: formData.userId,
+      photo_url: publicUrlData.publicUrl, // Use the public URL from the getPublicUrl response
       license_number: formData.license_number,
       license_expiry: formData.license_expiry.toISOString(),
     });
@@ -262,6 +293,22 @@ export default function NewDriverPage() {
                     </Popover>
                   </div>
                 </div>
+              </div>
+
+              <div className="grid gap-3">
+                <Label htmlFor="photo">Photo</Label>
+                <Input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setFormData(prev => ({ ...prev, photo: file }))
+                    }
+                  }}
+                  required
+                />
               </div>
             </>
           )}
